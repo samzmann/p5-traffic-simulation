@@ -3,7 +3,6 @@ function Car(initialBlock){
   this.block = initialBlock
   this.blockHistory = [initialBlock]
 
-  const directions = ['up', 'down', 'left', 'right']
   this.heading = 'up' // up, down, left, right
   this.isMoving = false
 
@@ -78,7 +77,7 @@ function Car(initialBlock){
   }
 
   this.show = (lineCoordinates) => {
-    fillHsluv(fillHue,100,50)
+    fillHsluv(fillHue,100,100)
     const b = this.block
     rect(b.x, b.y, b.s, b.s)
   }

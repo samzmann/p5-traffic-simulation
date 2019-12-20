@@ -1,8 +1,61 @@
 let modules = []
+const gridSize = 50
 
 let buildMode = 'road'
 let grid
 let cars = []
+
+const generateRoads = (blocks) => {
+  // pick random blocks
+  // for selected blocks:
+  //    pick a direction up, down, left, right
+  //    find the blocks extensions for the direction (blocks that are up, down, left, right)
+  //    set block and extensions to isRoad
+
+  // // maybe reduce is not usable in this JS version
+  // const selectedBlocks = [...blocks].reduce((val, acc) => {
+  //   const select = random() > 0.9 // 10% chance
+  //   if (select) {
+  //     return [...acc, val]
+  //   }
+  //   return acc
+  // }, [])
+
+  const selectedBlocks = []
+  for(let i = 0; i < blocks.length; i++) {
+    const select = random() > 0.95 // 5% chance
+      if (select) {
+        selectedBlocks.push(blocks[i])
+      }
+  }
+  console.log('selectedBlocks', selectedBlocks)
+
+  selectedBlocks.forEach(block => {
+    // pick a random direction (up, down, left, right)
+    const direction = directions[floor(random(directions.length))]
+    console.log('direction', direction)
+    const extensions = blocks.filter(b => {
+      switch (direction) {
+        case 'up':
+          // row (x) smaller or equal, column (y) equal
+          return b.coords.x <= block.coords.x && b.coords.y === block.coords.y
+        case 'down':
+          // row (x) greater or equal, column (y) equal
+          return b.coords.x >= block.coords.x && b.coords.y === block.coords.y
+        case 'left':
+          // row (x) equal, column (y) smaller or equal
+          return b.coords.x === block.coords.x && b.coords.y <= block.coords.y
+        case 'right':
+          // row (x) equal, column (y) greater or equal
+          return b.coords.x === block.coords.x && b.coords.y >= block.coords.y
+      }
+    })
+
+    console.log(extensions)
+
+    extensions.forEach(block => block.isRoad = true)
+  })
+}
 
 setup = () => {
   const canvas = createCanvas(500, 500)
@@ -19,7 +72,7 @@ setup = () => {
   buildCarBtn.position(buildRoadBtn.x + buildRoadBtn.width + 20, canvas.height + 20);
   buildCarBtn.mousePressed(() => { buildMode = 'car'});
 
-  grid = new Grid(0,0, 50, width)
+  grid = new Grid(0,0, gridSize, width)
   fill(255,0,55)
   grid.forEachBlock((i) => {
     const b = grid.blocks[i]
@@ -34,11 +87,20 @@ setup = () => {
   })
   console.log(grid)
 
+  generateRoads(grid.blocks)
+
+  // place random cars
+  grid.blocks.forEach(block => {
+    if (block.isRoad && random() > 0.9) {
+      cars.push(new Car(block))
+    }
+  })
+
   frameRate(10)
 }
 
 draw = () => {
-  background(0, 150)
+  background(0, 20)
 
   const mouse = createVector(mouseX, mouseY)
 
@@ -56,19 +118,11 @@ draw = () => {
 
   cars.forEach(car => {
     car.show()
-    // if (!car.isMoving) {
-      car.update()
-    // }
+    car.update()
   })
 }
 
-let debounce = false
 function clickBlock(e) { // e is click event
-  if (debounce) {
-    return
-  }
-
-  debounce = true
   const clickedBlock = grid.blocks.find(b => {
     return b.x <= e.x
       && b.x + b.s >= e.x
@@ -76,18 +130,21 @@ function clickBlock(e) { // e is click event
       && b.y + b.s >= e.y
   })
   if (clickedBlock) {
-    if (buildMode === 'road') {
-      clickedBlock.isRoad = true
-    } else if (buildMode === 'road-destroy') {
-      clickedBlock.isRoad = false
-    } else if (buildMode === 'car' && clickedBlock.isRoad ) {
-      cars.push(new Car(clickedBlock))
-      console.log(`Number of cars on the road: ${cars.length}`)
+    switch (buildMode) {
+      case 'road':
+        clickedBlock.isRoad = true;
+        break;
+      case 'road-destroy':
+        clickedBlock.isRoad = false;
+        break;
+      case 'car':
+        if (clickedBlock.isRoad ) {
+          cars.push(new Car(clickedBlock));
+          console.log(`Number of cars on the road: ${cars.length}`)
+        }
+        break
     }
   }
-  setTimeout(() => {
-    debounce = false
-  }, 100)
 }
 
 function mousePressed(e) {
