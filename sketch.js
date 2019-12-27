@@ -1,5 +1,11 @@
+/**
+ * Resources to check out:
+ * https://forum.processing.org/two/discussion/15667/traffic-light-simulation
+ * https://forum.processing.org/two/discussion/23784/simulating-traffic-movement-pedestrian-movement
+ * */
+
 let modules = []
-const gridSize = 50
+const gridSize = 10
 
 let buildMode = 'road'
 let grid
@@ -87,20 +93,20 @@ setup = () => {
   })
   console.log(grid)
 
-  generateRoads(grid.blocks)
-
-  // place random cars
-  grid.blocks.forEach(block => {
-    if (block.isRoad && random() > 0.9) {
-      cars.push(new Car(block))
-    }
-  })
+  // generateRoads(grid.blocks)
+  //
+  // // place random cars
+  // grid.blocks.forEach(block => {
+  //   if (block.isRoad && random() > 0.9) {
+  //     cars.push(new Car(block))
+  //   }
+  // })
 
   frameRate(10)
 }
 
 draw = () => {
-  background(0, 20)
+  background(0, 200)
 
   const mouse = createVector(mouseX, mouseY)
 
